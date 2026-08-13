@@ -159,8 +159,7 @@ public sealed class DiscordBotService : BackgroundService
         var mentionsBot = _client.CurrentUser is not null &&
             message.MentionedUsers.Any(user => user.Id == _client.CurrentUser.Id);
 
-        var requiresBotMention = options.RequireBotMention &&
-            !options.MentionOptionalChannelIds.Contains(message.Channel.Id);
+        var requiresBotMention = RequiresBotMention(message.Channel, options);
 
         if (!isDirectMessage && requiresBotMention && !mentionsBot && !hasExplicitProvider)
         {
@@ -250,6 +249,22 @@ public sealed class DiscordBotService : BackgroundService
         IDMChannel => "Direct Message",
         _ => channel.Name ?? channel.Id.ToString()
     };
+
+    private static bool RequiresBotMention(ISocketMessageChannel channel, DiscordOptions options)
+    {
+        if (!options.RequireBotMention || channel is IDMChannel)
+        {
+            return false;
+        }
+
+        if (options.MentionOptionalChannelIds.Contains(channel.Id))
+        {
+            return false;
+        }
+
+        return channel is SocketGuildChannel guildChannel
+            && string.Equals(guildChannel.Name, "general", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static string RemoveBotMention(string content)
     {

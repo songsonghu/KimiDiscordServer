@@ -26,7 +26,8 @@ KimiDiscordServer.Bot/
 
 ## 触发方式
 
-- 在服务器频道里 `@Bot` 后发送请求
+- 在 `general` 频道里 `@Bot` 后发送请求
+- 其他用户独立频道里可直接发消息，无需 `@Bot`
 - 或直接使用前缀：
   - `/claude 你的问题`
   - `/kimi 你的问题`
@@ -46,8 +47,8 @@ KimiDiscordServer.Bot/
 可选项：
 
 - `Discord:AllowedChannelIds`：限制允许处理的频道 ID
-- `Discord:RequireBotMention`：频道内是否必须 `@Bot`
-- `Discord:MentionOptionalChannelIds`：这些频道里可直接发消息，无需 `@Bot`
+- `Discord:RequireBotMention`：是否启用 `general` 频道必须 `@Bot` 的规则
+- `Discord:MentionOptionalChannelIds`：这些频道即使叫 `general` 也可直接发消息，无需 `@Bot`
 - `Discord:MaxAttachmentBytes`：单文件最大读取大小
 - `Discord:MaxTextDocumentBytes`：自动解析为纯文本的文档大小上限
 
