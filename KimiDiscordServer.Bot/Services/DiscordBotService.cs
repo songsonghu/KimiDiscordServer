@@ -150,8 +150,12 @@ public sealed class DiscordBotService : BackgroundService
             return false;
         }
 
-        var hasExplicitProvider = TryStripProviderPrefix(cleanedPrompt, out providerName, out var strippedPrompt);
-        cleanedPrompt = strippedPrompt;
+        var hasExplicitProvider = TryStripProviderPrefix(cleanedPrompt, out var explicitProviderName, out var strippedPrompt);
+        if (hasExplicitProvider)
+        {
+            providerName = explicitProviderName;
+            cleanedPrompt = strippedPrompt;
+        }
         var mentionsBot = _client.CurrentUser is not null &&
             message.MentionedUsers.Any(user => user.Id == _client.CurrentUser.Id);
 

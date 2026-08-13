@@ -39,7 +39,7 @@ public sealed class AttachmentContentService
             if (attachment.Size > options.MaxAttachmentBytes)
             {
                 parts.Add(AiPromptPart.TextPart(
-                    $"Attachment '{attachment.Filename}' was skipped because it exceeds the {options.MaxAttachmentBytes} byte limit."));
+                    $"Attachment '{attachment.Filename}' was skipped because Discord reported a size larger than the {options.MaxAttachmentBytes} byte limit."));
                 continue;
             }
 
