@@ -129,7 +129,7 @@ public sealed class DiscordBotService : BackgroundService
         {
             _logger.LogError(exception, "Failed to process Discord message {MessageId}.", message.Id);
             await message.ReplyAsync(
-                "处理请求时发生错误，请检查 Discord Token、模型 API Key 和模型配置。",
+                "处理请求时发生错误，请检查模型 API Key 和模型配置。",
                 allowedMentions: AllowedMentions.None);
         }
         finally
