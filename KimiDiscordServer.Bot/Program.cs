@@ -40,6 +40,5 @@ await builder.Build().RunAsync();
 
 static TimeSpan BuildTimeout(int timeoutSeconds)
 {
-    const int defaultTimeoutSeconds = 300;
-    return TimeSpan.FromSeconds(timeoutSeconds > 0 ? timeoutSeconds : defaultTimeoutSeconds);
+    return TimeSpan.FromSeconds(timeoutSeconds > 0 ? timeoutSeconds : AiOptions.DefaultRequestTimeoutSeconds);
 }

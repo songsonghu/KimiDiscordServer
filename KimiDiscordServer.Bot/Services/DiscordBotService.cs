@@ -122,15 +122,15 @@ public sealed class DiscordBotService : BackgroundService
 
             await SendReplyAsync(message, response);
         }
-        catch (OperationCanceledException) when (_stoppingToken.IsCancellationRequested)
-        {
-        }
-        catch (TaskCanceledException exception) when (!_stoppingToken.IsCancellationRequested)
+        catch (TaskCanceledException exception) when (!IsHostShutdownCancellation(exception))
         {
             _logger.LogWarning(exception, "AI request timed out for Discord message {MessageId}.", message.Id);
             await message.ReplyAsync(
                 $"模型响应超时（超过 {GetProviderTimeoutSeconds(providerName)} 秒），请稍后重试，或调大 `Ai:{providerName}:RequestTimeoutSeconds` 配置。",
                 allowedMentions: AllowedMentions.None);
+        }
+        catch (OperationCanceledException) when (_stoppingToken.IsCancellationRequested)
+        {
         }
         catch (Exception exception)
         {
@@ -285,18 +285,20 @@ public sealed class DiscordBotService : BackgroundService
 
     private int GetProviderTimeoutSeconds(string providerName)
     {
-        const int defaultTimeoutSeconds = 300;
         var aiOptions = _aiOptions.Value;
 
         return providerName switch
         {
             { } value when string.Equals(value, "Kimi", StringComparison.OrdinalIgnoreCase) =>
-                aiOptions.Kimi.RequestTimeoutSeconds > 0 ? aiOptions.Kimi.RequestTimeoutSeconds : defaultTimeoutSeconds,
+                aiOptions.Kimi.RequestTimeoutSeconds > 0 ? aiOptions.Kimi.RequestTimeoutSeconds : AiOptions.DefaultRequestTimeoutSeconds,
             { } value when string.Equals(value, "Claude", StringComparison.OrdinalIgnoreCase) =>
-                aiOptions.Claude.RequestTimeoutSeconds > 0 ? aiOptions.Claude.RequestTimeoutSeconds : defaultTimeoutSeconds,
-            _ => defaultTimeoutSeconds
+                aiOptions.Claude.RequestTimeoutSeconds > 0 ? aiOptions.Claude.RequestTimeoutSeconds : AiOptions.DefaultRequestTimeoutSeconds,
+            _ => AiOptions.DefaultRequestTimeoutSeconds
         };
     }
+
+    private bool IsHostShutdownCancellation(OperationCanceledException exception) =>
+        _stoppingToken.IsCancellationRequested && exception.CancellationToken == _stoppingToken;
 
     private static string RemoveBotMention(string content)
     {

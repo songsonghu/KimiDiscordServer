@@ -3,6 +3,7 @@ namespace KimiDiscordServer.Bot.Configuration;
 public sealed class AiOptions
 {
     public const string SectionName = "Ai";
+    public const int DefaultRequestTimeoutSeconds = 300;
 
     public string DefaultProvider { get; set; } = "Claude";
 
@@ -24,7 +25,7 @@ public sealed class ClaudeOptions
 
     public int MaxOutputTokens { get; set; } = 1024;
 
-    public int RequestTimeoutSeconds { get; set; } = 300;
+    public int RequestTimeoutSeconds { get; set; } = AiOptions.DefaultRequestTimeoutSeconds;
 }
 
 public sealed class KimiOptions
@@ -37,5 +38,5 @@ public sealed class KimiOptions
 
     public int MaxOutputTokens { get; set; } = 1024;
 
-    public int RequestTimeoutSeconds { get; set; } = 300;
+    public int RequestTimeoutSeconds { get; set; } = AiOptions.DefaultRequestTimeoutSeconds;
 }
