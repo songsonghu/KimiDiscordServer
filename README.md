@@ -50,6 +50,8 @@ KimiDiscordServer.Bot/
 - `Discord:MaxAttachmentBytes`：单文件最大读取大小
 - `Discord:MaxTextDocumentBytes`：自动解析为纯文本的文档大小上限
 
+建议把 `Discord Token` 和各模型 `API Key` 放到 **User Secrets** 或环境变量中，不要直接把真实密钥写入仓库里的 `appsettings.json`。
+
 ## 运行
 
 ```bash

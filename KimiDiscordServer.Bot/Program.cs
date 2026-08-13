@@ -8,7 +8,9 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName));
 builder.Services.Configure<AiOptions>(builder.Configuration.GetSection(AiOptions.SectionName));
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("DiscordAttachments");
+builder.Services.AddHttpClient("Claude");
+builder.Services.AddHttpClient("Kimi");
 builder.Services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 {
     GatewayIntents = GatewayIntents.Guilds

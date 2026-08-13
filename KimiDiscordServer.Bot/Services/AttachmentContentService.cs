@@ -31,7 +31,7 @@ public sealed class AttachmentContentService
             return [];
         }
 
-        var httpClient = _httpClientFactory.CreateClient();
+        var httpClient = _httpClientFactory.CreateClient("DiscordAttachments");
         var parts = new List<AiPromptPart>();
 
         foreach (var attachment in attachments)
@@ -43,7 +43,18 @@ public sealed class AttachmentContentService
                 continue;
             }
 
-            var bytes = await DownloadBytesAsync(httpClient, attachment, options.MaxAttachmentBytes, cancellationToken);
+            byte[]? bytes;
+            try
+            {
+                bytes = await DownloadBytesAsync(httpClient, attachment, options.MaxAttachmentBytes, cancellationToken);
+            }
+            catch (HttpRequestException)
+            {
+                parts.Add(AiPromptPart.TextPart(
+                    $"Attachment '{attachment.Filename}' could not be downloaded from Discord and was skipped."));
+                continue;
+            }
+
             if (bytes is null)
             {
                 parts.Add(AiPromptPart.TextPart(

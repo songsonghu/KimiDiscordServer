@@ -150,7 +150,8 @@ public sealed class DiscordBotService : BackgroundService
             return false;
         }
 
-        var hasExplicitProvider = TryStripProviderPrefix(cleanedPrompt, out providerName, out cleanedPrompt);
+        var hasExplicitProvider = TryStripProviderPrefix(cleanedPrompt, out providerName, out var strippedPrompt);
+        cleanedPrompt = strippedPrompt;
         var mentionsBot = _client.CurrentUser is not null &&
             message.MentionedUsers.Any(user => user.Id == _client.CurrentUser.Id);
 
@@ -204,12 +205,14 @@ public sealed class DiscordBotService : BackgroundService
 
     private async Task SendReplyAsync(SocketUserMessage sourceMessage, string content)
     {
+        var firstChunk = true;
         foreach (var chunk in Chunk(content, _discordOptions.Value.MaxDiscordMessageLength))
         {
             await sourceMessage.Channel.SendMessageAsync(
                 text: chunk,
-                messageReference: new MessageReference(sourceMessage.Id),
+                messageReference: firstChunk ? new MessageReference(sourceMessage.Id) : null,
                 allowedMentions: AllowedMentions.None);
+            firstChunk = false;
         }
     }
 

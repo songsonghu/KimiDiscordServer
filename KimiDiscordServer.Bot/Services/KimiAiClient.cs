@@ -54,7 +54,7 @@ public sealed class KimiAiClient : IAiChatClient
 
         httpRequest.Content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json");
 
-        using var response = await _httpClientFactory.CreateClient().SendAsync(httpRequest, cancellationToken);
+        using var response = await _httpClientFactory.CreateClient("Kimi").SendAsync(httpRequest, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
