@@ -122,7 +122,7 @@ public sealed class DiscordBotService : BackgroundService
 
             await SendReplyAsync(message, response);
         }
-        catch (TaskCanceledException exception) when (!IsHostShutdownCancellation(exception))
+        catch (TaskCanceledException exception) when (!_stoppingToken.IsCancellationRequested)
         {
             _logger.LogWarning(exception, "AI request timed out for Discord message {MessageId}.", message.Id);
             await message.ReplyAsync(
@@ -296,9 +296,6 @@ public sealed class DiscordBotService : BackgroundService
             _ => AiOptions.DefaultRequestTimeoutSeconds
         };
     }
-
-    private bool IsHostShutdownCancellation(OperationCanceledException exception) =>
-        _stoppingToken.IsCancellationRequested && exception.CancellationToken == _stoppingToken;
 
     private static string RemoveBotMention(string content)
     {
