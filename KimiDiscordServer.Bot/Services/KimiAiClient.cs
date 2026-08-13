@@ -107,9 +107,13 @@ public sealed class KimiAiClient : IAiChatClient
         {
             return await _httpClientFactory.CreateClient("Kimi").SendAsync(httpRequest, cancellationToken);
         }
-        catch (TaskCanceledException exception) when (exception.InnerException is OperationCanceledException { InnerException: TimeoutException })
+        catch (TaskCanceledException exception) when (IsRequestTimeout(exception))
         {
             throw new TimeoutException("Kimi request timed out.", exception);
         }
     }
+
+    private static bool IsRequestTimeout(TaskCanceledException exception) =>
+        exception.InnerException is TimeoutException
+        || exception.InnerException is OperationCanceledException { InnerException: TimeoutException };
 }

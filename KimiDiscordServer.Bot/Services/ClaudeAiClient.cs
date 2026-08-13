@@ -98,9 +98,13 @@ public sealed class ClaudeAiClient : IAiChatClient
         {
             return await _httpClientFactory.CreateClient("Claude").SendAsync(httpRequest, cancellationToken);
         }
-        catch (TaskCanceledException exception) when (exception.InnerException is OperationCanceledException { InnerException: TimeoutException })
+        catch (TaskCanceledException exception) when (IsRequestTimeout(exception))
         {
             throw new TimeoutException("Claude request timed out.", exception);
         }
     }
+
+    private static bool IsRequestTimeout(TaskCanceledException exception) =>
+        exception.InnerException is TimeoutException
+        || exception.InnerException is OperationCanceledException { InnerException: TimeoutException };
 }
