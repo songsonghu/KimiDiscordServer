@@ -1,15 +1,7 @@
 using KimiDiscordServer.Bot.Configuration;
-using KimiDiscordServer.Bot.Models;
 using Microsoft.Extensions.Options;
 
 namespace KimiDiscordServer.Bot.Services;
-
-public interface IAiChatClient
-{
-    string ProviderName { get; }
-
-    Task<string> GenerateReplyAsync(AiChatRequest request, CancellationToken cancellationToken);
-}
 
 public sealed class AiProviderFactory
 {

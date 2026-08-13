@@ -14,11 +14,11 @@ public sealed class AttachmentContentService
     };
 
     private static readonly UTF8Encoding Utf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: false);
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public AttachmentContentService(HttpClient httpClient)
+    public AttachmentContentService(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<IReadOnlyList<AiPromptPart>> BuildPartsAsync(
@@ -31,6 +31,7 @@ public sealed class AttachmentContentService
             return [];
         }
 
+        var httpClient = _httpClientFactory.CreateClient();
         var parts = new List<AiPromptPart>();
 
         foreach (var attachment in attachments)
@@ -42,7 +43,14 @@ public sealed class AttachmentContentService
                 continue;
             }
 
-            var bytes = await _httpClient.GetByteArrayAsync(attachment.Url, cancellationToken);
+            var bytes = await DownloadBytesAsync(httpClient, attachment, options.MaxAttachmentBytes, cancellationToken);
+            if (bytes is null)
+            {
+                parts.Add(AiPromptPart.TextPart(
+                    $"Attachment '{attachment.Filename}' was skipped because the downloaded payload exceeded the {options.MaxAttachmentBytes} byte limit."));
+                continue;
+            }
+
             var mediaType = string.IsNullOrWhiteSpace(attachment.ContentType)
                 ? GuessMediaType(attachment.Filename)
                 : attachment.ContentType;
@@ -88,6 +96,48 @@ public sealed class AttachmentContentService
     private static string DecodeText(byte[] bytes) => Utf8.GetString(bytes);
 
     private static bool LooksBinary(string text) => text.Any(static character => character == '\0');
+
+    private static async Task<byte[]?> DownloadBytesAsync(
+        HttpClient httpClient,
+        Attachment attachment,
+        long maxBytes,
+        CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.GetAsync(
+            attachment.Url,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        if (response.Content.Headers.ContentLength is long contentLength && contentLength > maxBytes)
+        {
+            return null;
+        }
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var memoryStream = new MemoryStream();
+        var buffer = new byte[81920];
+        long totalRead = 0;
+
+        while (true)
+        {
+            var read = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cancellationToken);
+            if (read == 0)
+            {
+                break;
+            }
+
+            totalRead += read;
+            if (totalRead > maxBytes)
+            {
+                return null;
+            }
+
+            await memoryStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+        }
+
+        return memoryStream.ToArray();
+    }
 
     private static string GuessMediaType(string filename)
     {

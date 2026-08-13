@@ -10,12 +10,12 @@ namespace KimiDiscordServer.Bot.Services;
 public sealed class ClaudeAiClient : IAiChatClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IOptions<AiOptions> _options;
 
-    public ClaudeAiClient(HttpClient httpClient, IOptions<AiOptions> options)
+    public ClaudeAiClient(IHttpClientFactory httpClientFactory, IOptions<AiOptions> options)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _options = options;
     }
 
@@ -51,7 +51,7 @@ public sealed class ClaudeAiClient : IAiChatClient
 
         httpRequest.Content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json");
 
-        using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+        using var response = await _httpClientFactory.CreateClient().SendAsync(httpRequest, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {

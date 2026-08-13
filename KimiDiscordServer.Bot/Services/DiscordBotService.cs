@@ -73,8 +73,8 @@ public sealed class DiscordBotService : BackgroundService
             _client.Ready -= OnReadyAsync;
             _client.Log -= OnDiscordLogAsync;
 
-            await _client.StopAsync();
             await _client.LogoutAsync();
+            await _client.StopAsync();
         }
     }
 
@@ -97,9 +97,11 @@ public sealed class DiscordBotService : BackgroundService
         }
 
         var semaphore = _channelExecutionCoordinator.Get(message.Channel.Id);
-        await semaphore.WaitAsync(_stoppingToken);
+        var acquired = false;
         try
         {
+            await semaphore.WaitAsync(_stoppingToken);
+            acquired = true;
             using var typing = message.Channel.EnterTypingState();
             var request = await BuildRequestAsync(providerName, cleanedPrompt, message);
             var client = _providerFactory.Resolve(request.Provider);
@@ -112,6 +114,9 @@ public sealed class DiscordBotService : BackgroundService
 
             await SendReplyAsync(message, response);
         }
+        catch (OperationCanceledException) when (_stoppingToken.IsCancellationRequested)
+        {
+        }
         catch (Exception exception)
         {
             _logger.LogError(exception, "Failed to process Discord message {MessageId}.", message.Id);
@@ -121,7 +126,10 @@ public sealed class DiscordBotService : BackgroundService
         }
         finally
         {
-            semaphore.Release();
+            if (acquired)
+            {
+                semaphore.Release();
+            }
         }
     }
 
