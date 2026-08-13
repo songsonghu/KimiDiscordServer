@@ -24,6 +24,7 @@ public sealed class DiscordBotService : BackgroundService
     private readonly AiProviderFactory _providerFactory;
     private readonly AttachmentContentService _attachmentContentService;
     private readonly ChannelExecutionCoordinator _channelExecutionCoordinator;
+    private CancellationToken _stoppingToken = CancellationToken.None;
 
     public DiscordBotService(
         DiscordSocketClient client,
@@ -45,6 +46,7 @@ public sealed class DiscordBotService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _stoppingToken = stoppingToken;
         var options = _discordOptions.Value;
         if (string.IsNullOrWhiteSpace(options.Token))
         {
@@ -95,13 +97,13 @@ public sealed class DiscordBotService : BackgroundService
         }
 
         var semaphore = _channelExecutionCoordinator.Get(message.Channel.Id);
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync(_stoppingToken);
         try
         {
             using var typing = message.Channel.EnterTypingState();
             var request = await BuildRequestAsync(providerName, cleanedPrompt, message);
             var client = _providerFactory.Resolve(request.Provider);
-            var response = await client.GenerateReplyAsync(request, CancellationToken.None);
+            var response = await client.GenerateReplyAsync(request, _stoppingToken);
 
             if (string.IsNullOrWhiteSpace(response))
             {
@@ -163,7 +165,7 @@ public sealed class DiscordBotService : BackgroundService
         var attachmentParts = await _attachmentContentService.BuildPartsAsync(
             message.Attachments,
             _discordOptions.Value,
-            CancellationToken.None);
+            _stoppingToken);
 
         promptParts.AddRange(attachmentParts);
 
@@ -242,7 +244,7 @@ public sealed class DiscordBotService : BackgroundService
             ' ',
             content
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Where(static token => !token.StartsWith("<@") || !token.EndsWith('>')));
+                .Where(static token => !(token.StartsWith("<@") && token.EndsWith('>'))));
     }
 
     private static bool TryStripProviderPrefix(string content, out string providerName, out string cleanedPrompt)

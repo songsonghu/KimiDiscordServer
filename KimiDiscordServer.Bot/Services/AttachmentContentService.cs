@@ -13,6 +13,7 @@ public sealed class AttachmentContentService
         ".cs", ".js", ".ts", ".tsx", ".jsx", ".py", ".java", ".go", ".sql", ".html", ".css"
     };
 
+    private static readonly UTF8Encoding Utf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: false);
     private readonly HttpClient _httpClient;
 
     public AttachmentContentService(HttpClient httpClient)
@@ -84,7 +85,7 @@ public sealed class AttachmentContentService
         return TextExtensions.Contains(Path.GetExtension(filename));
     }
 
-    private static string DecodeText(byte[] bytes) => Encoding.UTF8.GetString(bytes);
+    private static string DecodeText(byte[] bytes) => Utf8.GetString(bytes);
 
     private static bool LooksBinary(string text) => text.Any(static character => character == '\0');
 

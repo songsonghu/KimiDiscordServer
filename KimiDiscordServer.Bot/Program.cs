@@ -8,7 +8,9 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName));
 builder.Services.Configure<AiOptions>(builder.Configuration.GetSection(AiOptions.SectionName));
 
-builder.Services.AddSingleton(new HttpClient());
+builder.Services.AddHttpClient<AttachmentContentService>();
+builder.Services.AddHttpClient<IAiChatClient, ClaudeAiClient>();
+builder.Services.AddHttpClient<IAiChatClient, KimiAiClient>();
 builder.Services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 {
     GatewayIntents = GatewayIntents.Guilds
@@ -18,10 +20,7 @@ builder.Services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
     LogGatewayIntentWarnings = false
 }));
 
-builder.Services.AddSingleton<AttachmentContentService>();
 builder.Services.AddSingleton<AiProviderFactory>();
-builder.Services.AddSingleton<IAiChatClient, ClaudeAiClient>();
-builder.Services.AddSingleton<IAiChatClient, KimiAiClient>();
 builder.Services.AddSingleton<ChannelExecutionCoordinator>();
 builder.Services.AddHostedService<DiscordBotService>();
 

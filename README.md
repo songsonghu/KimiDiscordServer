@@ -36,7 +36,7 @@ KimiDiscordServer.Bot/
 
 ## 配置
 
-编辑 `/home/runner/work/KimiDiscordServer/KimiDiscordServer/KimiDiscordServer.Bot/appsettings.json`，填入：
+编辑 `KimiDiscordServer.Bot/appsettings.json`，填入：
 
 - `Discord:Token`：Discord Bot Token
 - `Ai:DefaultProvider`：默认模型提供方，`Claude` 或 `Kimi`
@@ -55,7 +55,7 @@ KimiDiscordServer.Bot/
 ```bash
 dotnet restore
 dotnet build
-dotnet run --project /home/runner/work/KimiDiscordServer/KimiDiscordServer/KimiDiscordServer.Bot/KimiDiscordServer.Bot.csproj
+dotnet run --project KimiDiscordServer.Bot/KimiDiscordServer.Bot.csproj
 ```
 
 ## 注意
