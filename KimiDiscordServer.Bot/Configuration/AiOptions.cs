@@ -23,6 +23,8 @@ public sealed class ClaudeOptions
     public string Endpoint { get; set; } = "https://api.anthropic.com/v1/messages";
 
     public int MaxOutputTokens { get; set; } = 1024;
+
+    public int RequestTimeoutSeconds { get; set; } = 300;
 }
 
 public sealed class KimiOptions
@@ -34,4 +36,6 @@ public sealed class KimiOptions
     public string Endpoint { get; set; } = "https://api.moonshot.cn/v1/chat/completions";
 
     public int MaxOutputTokens { get; set; } = 1024;
+
+    public int RequestTimeoutSeconds { get; set; } = 300;
 }

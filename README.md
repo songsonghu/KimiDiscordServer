@@ -51,6 +51,8 @@ KimiDiscordServer.Bot/
 - `Discord:MentionOptionalChannelIds`：这些频道即使叫 `general` 也可直接发消息，无需 `@Bot`
 - `Discord:MaxAttachmentBytes`：单文件最大读取大小
 - `Discord:MaxTextDocumentBytes`：自动解析为纯文本的文档大小上限
+- `Ai:Claude:RequestTimeoutSeconds`：Claude 请求超时时间（秒）
+- `Ai:Kimi:RequestTimeoutSeconds`：Kimi 请求超时时间（秒）
 
 如果同时配置了 `Discord:AllowedChannelIds`，那么免 `@Bot` 的频道也需要出现在 `AllowedChannelIds` 中，才会被处理。
 
@@ -69,3 +71,4 @@ dotnet run --project KimiDiscordServer.Bot/KimiDiscordServer.Bot.csproj
 - 二进制文档（如 PDF、Word、Excel）当前会保留文件元信息，但不会自动抽取全文
 - 如果要增强 PDF/Office 解析，可以在 `AttachmentContentService` 中继续扩展
 - 请在 Discord Developer Portal 为 Bot 打开读取消息内容所需的权限（Message Content Intent）
+- 如果模型响应较慢，可适当调大 `Ai:*:RequestTimeoutSeconds`，默认是 300 秒
