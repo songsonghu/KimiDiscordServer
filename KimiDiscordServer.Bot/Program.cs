@@ -2,6 +2,7 @@ using Discord;
 using Discord.WebSocket;
 using KimiDiscordServer.Bot.Configuration;
 using KimiDiscordServer.Bot.Services;
+using Microsoft.Extensions.Options;
 
 var builder = Host.CreateApplicationBuilder(args);
 
