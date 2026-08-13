@@ -51,7 +51,7 @@ public sealed class ClaudeAiClient : IAiChatClient
 
         httpRequest.Content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json");
 
-        using var response = await _httpClientFactory.CreateClient("Claude").SendAsync(httpRequest, cancellationToken);
+        using var response = await SendAsync(httpRequest, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
@@ -90,5 +90,17 @@ public sealed class ClaudeAiClient : IAiChatClient
             },
             _ => throw new InvalidOperationException($"Unsupported prompt part '{part.Kind}'.")
         };
+    }
+
+    private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage httpRequest, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _httpClientFactory.CreateClient("Claude").SendAsync(httpRequest, cancellationToken);
+        }
+        catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException("Claude request timed out.", exception);
+        }
     }
 }

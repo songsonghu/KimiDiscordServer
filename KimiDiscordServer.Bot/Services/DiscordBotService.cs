@@ -122,7 +122,7 @@ public sealed class DiscordBotService : BackgroundService
 
             await SendReplyAsync(message, response);
         }
-        catch (TaskCanceledException exception) when (!_stoppingToken.IsCancellationRequested)
+        catch (TimeoutException exception)
         {
             _logger.LogWarning(exception, "AI request timed out for Discord message {MessageId}.", message.Id);
             await message.ReplyAsync(
