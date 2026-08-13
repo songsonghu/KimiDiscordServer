@@ -91,8 +91,16 @@ public sealed class DiscordBotService : BackgroundService
             return;
         }
 
-        if (!TryPrepareRequest(message, out var providerName, out var cleanedPrompt))
+        if (!TryPrepareRequest(message, out var providerName, out var cleanedPrompt, out var providerExplicitlySelected))
         {
+            return;
+        }
+
+        if (providerExplicitlySelected && !_providerFactory.IsProviderConfigured(providerName))
+        {
+            await message.ReplyAsync(
+                $"「{providerName}」未配置 API Key，无法使用该模型。请改用已配置的模型，例如 Kimi（发送 `/kimi 你的问题`）。",
+                allowedMentions: AllowedMentions.None);
             return;
         }
 
@@ -133,11 +141,12 @@ public sealed class DiscordBotService : BackgroundService
         }
     }
 
-    private bool TryPrepareRequest(SocketUserMessage message, out string providerName, out string cleanedPrompt)
+    private bool TryPrepareRequest(SocketUserMessage message, out string providerName, out string cleanedPrompt, out bool providerExplicitlySelected)
     {
         var options = _discordOptions.Value;
         providerName = _providerFactory.GetDefaultProvider();
         cleanedPrompt = RemoveBotMention(message.Content).Trim();
+        providerExplicitlySelected = false;
 
         var isDirectMessage = message.Channel is IDMChannel;
         if (isDirectMessage && !options.AllowDirectMessages)
@@ -155,6 +164,7 @@ public sealed class DiscordBotService : BackgroundService
         {
             providerName = explicitProviderName;
             cleanedPrompt = strippedPrompt;
+            providerExplicitlySelected = true;
         }
         var mentionsBot = _client.CurrentUser is not null &&
             message.MentionedUsers.Any(user => user.Id == _client.CurrentUser.Id);

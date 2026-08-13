@@ -18,6 +18,18 @@ public sealed class AiProviderFactory
 
     public string GetDefaultProvider() => _options.DefaultProvider;
 
+    public bool IsProviderConfigured(string providerName)
+    {
+        return providerName switch
+        {
+            { } p when string.Equals(p, "Claude", StringComparison.OrdinalIgnoreCase) =>
+                !string.IsNullOrWhiteSpace(_options.Claude.ApiKey),
+            { } p when string.Equals(p, "Kimi", StringComparison.OrdinalIgnoreCase) =>
+                !string.IsNullOrWhiteSpace(_options.Kimi.ApiKey),
+            _ => true
+        };
+    }
+
     public IAiChatClient Resolve(string providerName)
     {
         if (_clients.TryGetValue(providerName, out var client))
