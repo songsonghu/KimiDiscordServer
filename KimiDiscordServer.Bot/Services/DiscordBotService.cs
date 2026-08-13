@@ -99,7 +99,7 @@ public sealed class DiscordBotService : BackgroundService
         if (providerExplicitlySelected && !_providerFactory.IsProviderConfigured(providerName))
         {
             await message.ReplyAsync(
-                $"「{providerName}」未配置 API Key，无法使用该模型。请改用已配置的模型，例如 Kimi（发送 `/kimi 你的问题`）。",
+                $"「{providerName}」未配置 API Key，无法使用该模型。请改用其他已配置的模型，或联系管理员补充配置。",
                 allowedMentions: AllowedMentions.None);
             return;
         }

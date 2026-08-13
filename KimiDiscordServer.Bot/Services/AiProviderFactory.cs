@@ -26,7 +26,7 @@ public sealed class AiProviderFactory
                 !string.IsNullOrWhiteSpace(_options.Claude.ApiKey),
             { } p when string.Equals(p, "Kimi", StringComparison.OrdinalIgnoreCase) =>
                 !string.IsNullOrWhiteSpace(_options.Kimi.ApiKey),
-            _ => true
+            _ => false
         };
     }
 
