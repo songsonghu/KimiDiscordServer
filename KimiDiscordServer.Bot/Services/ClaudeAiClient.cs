@@ -10,12 +10,12 @@ namespace KimiDiscordServer.Bot.Services;
 public sealed class ClaudeAiClient : IAiChatClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
     private readonly IOptions<AiOptions> _options;
 
-    public ClaudeAiClient(IHttpClientFactory httpClientFactory, IOptions<AiOptions> options)
+    public ClaudeAiClient(HttpClient httpClient, IOptions<AiOptions> options)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
         _options = options;
     }
 
@@ -29,7 +29,6 @@ public sealed class ClaudeAiClient : IAiChatClient
             throw new InvalidOperationException("Claude API key is not configured.");
         }
 
-        var client = _httpClientFactory.CreateClient();
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, options.Endpoint);
         httpRequest.Headers.Add("x-api-key", options.ApiKey);
         httpRequest.Headers.Add("anthropic-version", "2023-06-01");
@@ -52,7 +51,7 @@ public sealed class ClaudeAiClient : IAiChatClient
 
         httpRequest.Content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json");
 
-        using var response = await client.SendAsync(httpRequest, cancellationToken);
+        using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {

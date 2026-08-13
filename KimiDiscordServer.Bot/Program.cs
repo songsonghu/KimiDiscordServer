@@ -8,7 +8,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName));
 builder.Services.Configure<AiOptions>(builder.Configuration.GetSection(AiOptions.SectionName));
 
-builder.Services.AddHttpClient();
+builder.Services.AddSingleton(new HttpClient());
 builder.Services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 {
     GatewayIntents = GatewayIntents.Guilds

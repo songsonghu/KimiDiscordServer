@@ -13,11 +13,11 @@ public sealed class AttachmentContentService
         ".cs", ".js", ".ts", ".tsx", ".jsx", ".py", ".java", ".go", ".sql", ".html", ".css"
     };
 
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
 
-    public AttachmentContentService(IHttpClientFactory httpClientFactory)
+    public AttachmentContentService(HttpClient httpClient)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
     }
 
     public async Task<IReadOnlyList<AiPromptPart>> BuildPartsAsync(
@@ -30,7 +30,6 @@ public sealed class AttachmentContentService
             return [];
         }
 
-        var client = _httpClientFactory.CreateClient();
         var parts = new List<AiPromptPart>();
 
         foreach (var attachment in attachments)
@@ -42,7 +41,7 @@ public sealed class AttachmentContentService
                 continue;
             }
 
-            var bytes = await client.GetByteArrayAsync(attachment.Url, cancellationToken);
+            var bytes = await _httpClient.GetByteArrayAsync(attachment.Url, cancellationToken);
             var mediaType = string.IsNullOrWhiteSpace(attachment.ContentType)
                 ? GuessMediaType(attachment.Filename)
                 : attachment.ContentType;

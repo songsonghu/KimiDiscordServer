@@ -10,12 +10,12 @@ namespace KimiDiscordServer.Bot.Services;
 public sealed class KimiAiClient : IAiChatClient
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
     private readonly IOptions<AiOptions> _options;
 
-    public KimiAiClient(IHttpClientFactory httpClientFactory, IOptions<AiOptions> options)
+    public KimiAiClient(HttpClient httpClient, IOptions<AiOptions> options)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
         _options = options;
     }
 
@@ -29,7 +29,6 @@ public sealed class KimiAiClient : IAiChatClient
             throw new InvalidOperationException("Kimi API key is not configured.");
         }
 
-        var client = _httpClientFactory.CreateClient();
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, options.Endpoint);
         httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.ApiKey);
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -55,7 +54,7 @@ public sealed class KimiAiClient : IAiChatClient
 
         httpRequest.Content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json");
 
-        using var response = await client.SendAsync(httpRequest, cancellationToken);
+        using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
