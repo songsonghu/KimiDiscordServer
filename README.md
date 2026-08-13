@@ -47,6 +47,7 @@ KimiDiscordServer.Bot/
 
 - `Discord:AllowedChannelIds`：限制允许处理的频道 ID
 - `Discord:RequireBotMention`：频道内是否必须 `@Bot`
+- `Discord:MentionOptionalChannelIds`：这些频道里可直接发消息，无需 `@Bot`
 - `Discord:MaxAttachmentBytes`：单文件最大读取大小
 - `Discord:MaxTextDocumentBytes`：自动解析为纯文本的文档大小上限
 

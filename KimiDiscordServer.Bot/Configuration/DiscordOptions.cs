@@ -12,6 +12,8 @@ public sealed class DiscordOptions
 
     public List<ulong> AllowedChannelIds { get; set; } = [];
 
+    public List<ulong> MentionOptionalChannelIds { get; set; } = [];
+
     public long MaxAttachmentBytes { get; set; } = 4 * 1024 * 1024;
 
     public int MaxTextDocumentBytes { get; set; } = 256 * 1024;

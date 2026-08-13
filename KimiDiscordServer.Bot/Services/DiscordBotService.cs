@@ -159,7 +159,10 @@ public sealed class DiscordBotService : BackgroundService
         var mentionsBot = _client.CurrentUser is not null &&
             message.MentionedUsers.Any(user => user.Id == _client.CurrentUser.Id);
 
-        if (!isDirectMessage && options.RequireBotMention && !mentionsBot && !hasExplicitProvider)
+        var requiresBotMention = options.RequireBotMention &&
+            !options.MentionOptionalChannelIds.Contains(message.Channel.Id);
+
+        if (!isDirectMessage && requiresBotMention && !mentionsBot && !hasExplicitProvider)
         {
             return false;
         }
