@@ -10,9 +10,9 @@ public sealed class DiscordOptions
 
     public bool AllowDirectMessages { get; set; } = true;
 
-    public List<ulong> AllowedChannelIds { get; set; } = [];
+    public HashSet<ulong> AllowedChannelIds { get; set; } = [];
 
-    public List<ulong> MentionOptionalChannelIds { get; set; } = [];
+    public HashSet<ulong> MentionOptionalChannelIds { get; set; } = [];
 
     public long MaxAttachmentBytes { get; set; } = 4 * 1024 * 1024;
 
